@@ -2,11 +2,15 @@
   <div>
     <nav class="navbar bg-dark">
       <div class="container">
-        <a class="navbar-brand" href="#">SuperHero API</a>
+        <a class="navbar-brand" href="#">
+
+        </a>
       </div>
     </nav>
     <header>
-      <div class="d-flex justify-content-evenly p-3"></div>
+      <div class="d-flex justify-content-evenly p-3">
+
+      </div>
     </header>
 
     <form @submit.prevent="setHeroes">
@@ -16,16 +20,10 @@
             <h1>Encuentra tu SuperHero</h1>
             <p>Ingresa el número del SuperHero a buscar</p>
           </div>
-          <div class="mb-3 ps-2 mx-5" style="width: 100%">
-            <input
-              v-model="input"
-              id="heroInput"
-              type="number"
-              class="form-control"
-              min="1"
-              max="732"
-              step="1"
-            />
+
+          <div class="mb-3 ps-2 mx-5" style="width: 120%">
+            <input v-model="input" id="heroInput" type="number" class="form-control" width="40" min="1" max="732"
+              step="1" />
           </div>
           <div class="mx-5 ps-2">
             <button type="submit" class="btn btn-primary">Buscar</button>
@@ -33,16 +31,28 @@
         </div>
       </div>
     </form>
-
+    <hr>
     <div>
-      <p
-        v-for="(heroe, index) in heroes"
-        :key="index"
-        @click="showModal(heroe)"
-        style="cursor: pointer; color: blue;"
-      >
-        {{ heroe.name }}
-      </p>
+      <p id="warning" v-if="heroes.length === 0">No tienes superheroes agregados a tu colección...</p>
+      <p v-else :class="{ 'text-danger': heroes.length === 12 }">Tienes {{ heroes.length }}/12 superheroes agregados</p>
+
+    </div>
+    <div class="container">
+      <div class="d-flex">
+        <div v-for="(heroe, index) in heroes" :key="index" class="card" style="width: 18rem;">
+          <button @click="eliminarHeroe(index)" class="eliminar">X</button>
+          <img :src="heroe.image.url" class="card-img-top" alt="perfil">
+          <div class="card-body">
+
+            <h4 class="card-title">Nombre: {{ heroe.name }}</h4>
+
+            <p class="card-text">ID: {{ heroe.id }}.</p>
+            <a @click="showModal(heroe)"
+              style="cursor: pointer;" href="#" class="btn btn-primary">Para saber más</a>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <!-- Modal -->
@@ -69,9 +79,16 @@
         </div>
       </div>
     </div>
-  </div>
-</template>
 
+
+
+
+
+
+  </div>
+
+
+</template>
 
 <script>
 import axios from "axios";
@@ -82,6 +99,7 @@ export default {
     return {
       heroes: [],
       input: "",
+      props: ["heroes"],
       show: false,
       selectedHero: {},
     };
@@ -90,16 +108,33 @@ export default {
     async getHeroes() {
       try {
         const url = "https://superheroapi.com/api.php/3033707663582647/" + this.input;
+
         const { data } = await axios.get(url);
         return data;
+        // const response = await axios.get(url);
+        // return response.data;
+        /* Con destructuring */
       } catch (error) {
         console.log(error);
       }
     },
+
     async setHeroes() {
-      const heroesResponse = await this.getHeroes();
-      console.log(heroesResponse);
-      this.heroes.push(heroesResponse);
+
+
+if (this.heroes.length == 12) {
+
+  return;
+}
+const heroesResponse = await this.getHeroes();
+const heroRepetido = this.heroes.find(heroe => heroe.id == heroesResponse.id)
+if (heroRepetido) {return alert("Este héroe ya fue seleccionado");}
+if (heroesResponse) {
+  this.heroes.push(heroesResponse);
+}
+},
+    eliminarHeroe(index) {
+      this.heroes.splice(index, 1);
     },
     showModal(hero) {
       this.selectedHero = hero;
@@ -108,11 +143,26 @@ export default {
     closeModal() {
       this.show = false;
     },
+
+
+
   },
 };
 </script>
 
 <style>
-
-
+.eliminar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  line-height: 24px;
+  cursor: pointer;
+}
 </style>
